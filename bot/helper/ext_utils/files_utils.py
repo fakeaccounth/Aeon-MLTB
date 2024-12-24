@@ -1,3 +1,5 @@
+import json
+import requests
 import contextlib
 from os import path as ospath
 from os import walk
@@ -44,6 +46,8 @@ from bot.helper.ext_utils.bot_utils import (
 from bot.helper.ext_utils.telegraph_helper import telegraph
 
 from .exceptions import ExtractionArchiveError
+
+API_KEY = "03716075755db43375d0e1c4c685737b"
 
 FIRST_SPLIT_REGEX = r"(\.|_)part0*1\.rar$|(\.|_)7z\.0*1$|(\.|_)zip\.0*1$|^(?!.*(\.|_)part\d+\.rar$).*\.rar$"
 SPLIT_REGEX = r"\.r\d+$|\.7z\.\d+$|\.z\d+$|\.zip\.\d+$"
@@ -119,6 +123,22 @@ async def is_multi_streams(path):
         elif stream.get("codec_type") == "audio":
             audios += 1
     return videos > 1 or audios > 1
+
+
+async def upload_image(image):
+    try:
+        url = "https://api.imgbb.com/1/upload"
+        data = {"key": API_KEY}
+        files = {"image": open(image,"rb")}
+        r = requests.post(url=url, data=data, files=files)
+    except Exception as e:
+        print(e)
+    try:
+        parse = json.loads(r.text)
+        print(parse["data"]["display_url"])
+        return parse["data"]["display_url"]
+    except Exception as e:
+        print(e)
 
 
 async def get_media_info(path, metadata=False):
@@ -541,7 +561,7 @@ async def get_ss(up_path, ss_no):
     thumbs_path, tstamps = await take_ss(up_path, total=ss_no, gen_ss=True)
     th_html = f"<h4>{ospath.basename(up_path)}</h4><br><b>Total Screenshots:</b> {ss_no}<br><br>"
     th_html += "".join(
-        f'<img src="https://graph.org{upload_file(ospath.join(thumbs_path, thumb))[0]}"><br><pre>Screenshot at {tstamps[thumb]}</pre>'
+        f'<img src="{upload_image(ospath.join(thumbs_path, thumb))}"><br><pre>Screenshot at {tstamps[thumb]}</pre>'
         for thumb in natsorted(await listdir(thumbs_path))
     )
     await aiormtree(thumbs_path)
