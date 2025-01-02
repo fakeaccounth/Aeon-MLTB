@@ -541,7 +541,7 @@ async def checking_access(user_id, button=None):
             button = ButtonMaker()
         button.url(
             "Collect token",
-            tinyfy(short_url(f"https://telegram.me/{bot_name}?start={token}")),
+            short_url(f"https://telegram.me/{bot_name}?start={token}"),
         )
         return (
             f"Your token has expired, please collect a new token.\n<b>It will expire after {time_str}</b>!",
