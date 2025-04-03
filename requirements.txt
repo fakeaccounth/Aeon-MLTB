@@ -28,6 +28,7 @@ natsort
 pillow
 psutil
 pybase64
+pytz
 pycountry
 python-dotenv
 pyshorteners
